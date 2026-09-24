@@ -1,5 +1,8 @@
 # CROA Gemini Replay Demo
 
+Continuing development in a fresh session or on another computer? Start with
+[RESUME.md](RESUME.md) for the accepted checkpoint, setup, roles, and next directive.
+
 A deterministic, local demonstration of the scenarios in
 [the architecture](docs/ARCHITECTURE.md). The ungoverned “before” picture shows
 one legitimate CTF solve and three labelled unsafe outcomes. C3 now rejects the

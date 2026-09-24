@@ -1,5 +1,8 @@
 # AGENTS.md — CROA Gemini Replay Demo
 
+For a fresh session, also read `RESUME.md` after the architecture and plan. It records
+the accepted checkpoint, branch, roles, and next assignment; do not rely on chat history.
+
 You are the Constructor. The spec is `docs/ARCHITECTURE.md`; the work queue is
 `docs/PLAN.md`. Execute one directive per turn and stop when its Done block is true.
 
