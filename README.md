@@ -62,7 +62,7 @@ banner. This lets C2 demonstrate defence in depth after C3 has been weakened.
 | S1 Name collision | Contacts the real `.com` host. | The unregistered target is denied before policy evaluation. | C3 |
 | S2 Brute force | Guess 7 succeeds. | Three failed logins reach the target; guesses 4–10 are denied. | C4 |
 | S3 Leaked credential | Uses the public password to read fake customer data. | C3 denies by default; with `--registry-mistake`, C2 rejects password mode. | C3 or C2 |
-| S4 Bypass attempt | `not applicable (no C6)` | `BLOCKED: C6 DENY MISSING_ECC, ECC_REPLAYED, PARAMETER_MISMATCH` | C6 |
+| S4 Bypass attempt | `NOT APPLICABLE: ungoverned mode has no execution firewall` (each row: `not applicable (no C6)`) | `BLOCKED: C6 DENY MISSING_ECC, ECC_REPLAYED, PARAMETER_MISMATCH` | C6 |
 
 C4 reads every matching invariant from C1 and evaluates all reservations under one
 lock. If any projected count exceeds its limit, none of the matching counters are

@@ -171,10 +171,20 @@ No directive remains in PLAN. Do not start new work without an assignment.
   cells, and a governed outcome listing all three denials. S0–S3 output is
   byte-identical to `ff9c3a2` (ECC ids masked); 130 tests pass; Ruff clean;
   `python demo.py` exits 0 with 86 records, chain OK. It also ignores `croa-demo.kdl`.
-- Optionally have an Evaluator run PLAN's Evaluator checklist against `main`.
-- Remaining nit, not blocking: README's S4 ungoverned cell quotes
-  `not applicable (no C6)` while the outcome line reads
-  `NOT APPLICABLE: ungoverned mode has no execution firewall`.
+- Claude ran PLAN's Evaluator checklist on 2026-09-25 against `main` plus PR #2
+  (Gemini has not run it). Results: (1) Done commands pass. (2) Every code printed
+  across all flag combinations is defined in `croa/reasons.py`. (3) World counters
+  show zero unauthorized effects (tests and probes). (4) Unanticipated inputs all
+  fail closed with World counters at zero: password plus `credential_id`, no auth
+  inputs, extra `read_file` parameter, `/ctf/../` traversal, and non-`/ctf/` paths
+  (C2); empty, case-variant, and unknown-action targets (C3); wrong-bound and unknown
+  credentials under `--registry-mistake` (C2 `CREDENTIAL_NOT_ISSUED`); ECCs with
+  altered session, subject, or expiry, or from another runtime (`INVALID_SIGNATURE`);
+  an ECC for a non-configured session (`SUBJECT_MISMATCH`). (5) The import-boundary
+  test covers every module in `agent/` (including `bypass_tools.py`), `world/`,
+  `croa/`, and the root. (6) Three randomly chosen functions were explainable from
+  their docstrings. Expected, by trust assumption 3: a new session identity gets a
+  fresh C4 budget, because session and subject are trusted.
 - Environment note: on the WSL machine `python` is a user symlink to `python3`
   in `~/.local/bin`; `pytest` and `ruff` live only in `.venv`, so activate it first.
 
