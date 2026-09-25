@@ -26,6 +26,16 @@ class TrajectoryVerdict:
     limit: int | None
 
 
+@dataclass(frozen=True)
+class _Reservation:
+    """One matching invariant's counter state for an atomic decision."""
+
+    key: tuple[str, ...]
+    current: int
+    projected: int
+    limit: int
+
+
 class TrajectoryMonitor:
     """Per-run counters that atomically evaluate and commit permitted reservations."""
 
@@ -50,7 +60,7 @@ class TrajectoryMonitor:
     def reserve(
         self, session: str, subject: str, action: str, target: str,
     ) -> TrajectoryVerdict:
-        """Reserve one action unless its C1 trajectory limit would be exceeded.
+        """Reserve one action only when every matching C1 invariant permits it.
 
         Args:
             session: Honest session identity used to scope the counter.
@@ -58,29 +68,42 @@ class TrajectoryMonitor:
             action: Proposed operation matched against C1's invariant action.
             target: Grounded host used to scope the counter.
         Returns:
-            Usage before and after the proposal, its limit, and PERMIT or DENY.
+            The first denying invariant's usage, or the first permitted one's usage.
         """
-        matching = next(
-            ((name, invariant) for name, invariant in self._invariants
-             if invariant.action == action),
-            None,
-        )
-        if matching is None:
+        matching = [
+            (name, invariant) for name, invariant in self._invariants
+            if invariant.action == action
+        ]
+        if not matching:
             return TrajectoryVerdict(PERMIT, PERMIT, 0, 0, None)
-        name, invariant = matching
-        key = self._counter_key(name, invariant, session, subject, target)
         with self._lock:
-            current = self._counts.get(key, 0)
-            projected = current + 1
-            if projected > invariant.limit:
+            reservations = [
+                self._reservation(name, invariant, session, subject, target)
+                for name, invariant in matching
+            ]
+            denied = next(
+                (item for item in reservations if item.projected > item.limit), None,
+            )
+            if denied is not None:
                 return TrajectoryVerdict(
                     DENY, TRAJECTORY_LIMIT_EXCEEDED,
-                    current, projected, invariant.limit,
+                    denied.current, denied.projected, denied.limit,
                 )
-            self._counts[key] = projected
+            for item in reservations:
+                self._counts[item.key] = item.projected
+        first = reservations[0]
         return TrajectoryVerdict(
-            PERMIT, PERMIT, current, projected, invariant.limit,
+            PERMIT, PERMIT, first.current, first.projected, first.limit,
         )
+
+    def _reservation(
+        self, name: str, invariant: c1_policy.Invariant,
+        session: str, subject: str, target: str,
+    ) -> _Reservation:
+        """Read one counter while the caller holds the evaluate-and-commit lock."""
+        key = self._counter_key(name, invariant, session, subject, target)
+        current = self._counts.get(key, 0)
+        return _Reservation(key, current, current + 1, invariant.limit)
 
     def check(self, request: Request) -> StageTrace:
         """Expose an atomic reservation as a control-plane C4 stage trace.

@@ -1,7 +1,7 @@
 """Shared records for the replay's tool boundary.
 
 Demo role: describe targets, parameters, and outcomes without granting capabilities.
-Gemini action it addresses: #1–3, inputs and results of the scripted actions.
+Gemini action it addresses: #1–3 plus records for the S4 bypass attempts.
 Must never import: world, agent, or CROA implementations.
 """
 

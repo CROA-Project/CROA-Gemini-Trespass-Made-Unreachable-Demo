@@ -1,7 +1,7 @@
 """C6 Execution Firewall.
 
 CROA component: C6 — the governed execution boundary and secret injector.
-Gemini action it addresses: #1–3, requiring an unchanged, single-use authorization.
+Gemini action it addresses: #1–3 and S4, requiring unchanged single-use authorization.
 Fails closed: presence, signature, identity, expiry, parameters, then replay are
 checked before World execution; secrets are injected only after admission.
 C1 policy is rechecked after replay validation using the same evaluator as C2.

@@ -199,6 +199,7 @@ CROA_Example/
   runtime.py                Composition root. The ONLY place a World is constructed and
                             the only place ungoverned tools are wired to it.
   transcript.py             Two-column transcript rendering
+  summary.py                Final summary table (split from transcript.py for size; CD-006)
   docs/
     ARCHITECTURE.md         this file
     PLAN.md                 Constructor Directives for Codex
@@ -209,6 +210,9 @@ CROA_Example/
   agent/
     interface.py            the Tools abstract base
     scripted_agent.py       the fixed plans for S0–S4
+    bypass_tools.py         BypassTools, the S4-only harness that presents contracts
+                            directly to the injected C6 executor. runtime builds it
+                            only when asked (bypass=True); S0–S3 never receive it.
     tools.py                UngovernedTools and GovernedTools; both receive
                             capabilities by injection and never import world
   evidence/

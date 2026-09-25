@@ -72,6 +72,21 @@ def test_monitor_uses_scope_declared_by_c1() -> None:
     assert second.verdict == DENY
 
 
+def test_all_matching_invariants_commit_together_or_not_at_all() -> None:
+    """Deny on either matching limit without advancing another matching counter."""
+    invariants = {
+        "per-session": Invariant("login", "session", 2),
+        "per-target": Invariant("login", "target", 1),
+    }
+    monitor = TrajectoryMonitor(invariants)
+    first = monitor.reserve("session-a", "agent-a", "login", CTF_TARGET)
+    denied = monitor.reserve("session-a", "agent-a", "login", CTF_TARGET)
+    another_target = monitor.reserve("session-a", "agent-a", "login", REAL_TARGET)
+    assert first.verdict == PERMIT
+    assert denied.verdict == DENY
+    assert another_target.verdict == PERMIT
+
+
 def test_non_invariant_action_passes_without_counting() -> None:
     """Leave actions outside C1's trajectory table unrestricted by C4."""
     monitor = TrajectoryMonitor()

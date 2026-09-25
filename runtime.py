@@ -1,7 +1,7 @@
 """Replay composition and direct World adapter.
 
 Demo role: construct isolated worlds and wire capabilities outside agent/.
-Gemini action it addresses: #1–3, keeping execution authority out of the script.
+Gemini action it addresses: #1–3 plus isolated capability injection for S4.
 Must never import: scripted plans; this module wires dependencies, not agent choices.
 Registry flags are applied here so every governed run has one construction path.
 """
@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 
+from agent.bypass_tools import BypassTools
 from agent.tools import GovernedTools, Tools, UngovernedTools
 from croa import reasons
 from croa.c1_policy import ISSUED_CREDENTIALS
@@ -101,6 +102,7 @@ class ScenarioRuntime:
 def build_runtime(
     mode: str, evidence: EvidenceLog | None = None, *,
     options: RegistryOptions = RegistryOptions(),
+    bypass: bool = False,
 ) -> ScenarioRuntime:
     """Build fresh scenario state and give the agent only its tool capabilities.
 
@@ -108,6 +110,7 @@ def build_runtime(
         mode: Ungoverned or governed execution.
         evidence: Required evidence sink for governed execution.
         options: Registry additions and name-ambiguity behavior for this run.
+        bypass: Give only S4 direct access to the injected executor capability.
     Returns:
         Tools and their isolated World for the runner and evaluator.
     Raises:
@@ -128,5 +131,6 @@ def build_runtime(
         compiler.compile_ecc, evidence, resolver=resolver, checks=(monitor.check,),
     )
     firewall = ExecutionFirewall(signer, world, evidence)
-    governed = GovernedTools(plane, firewall, firewall.public_repo_read)
+    tool_type = BypassTools if bypass else GovernedTools
+    governed = tool_type(plane, firewall, firewall.public_repo_read)
     return ScenarioRuntime(governed, world)
