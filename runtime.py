@@ -14,6 +14,7 @@ from agent.tools import GovernedTools, Tools, UngovernedTools
 from croa import reasons
 from croa.c1_policy import ISSUED_CREDENTIALS
 from croa.c3_resolver import FEDERATED_CONTEXT_REGISTRY, PathResolver, RegistryEntry
+from croa.c4_trajectory import TrajectoryMonitor
 from croa.c5_evidence import EvidenceLog
 from croa.c6_firewall import ExecutionFirewall
 from croa.c7_compiler import ContractCompiler, Signer
@@ -122,7 +123,10 @@ def build_runtime(
     signer = Signer()
     compiler = ContractCompiler(signer)
     resolver = PathResolver(build_registry(options), ambiguous=options.ambiguous)
-    plane = ControlPlane(compiler.compile_ecc, evidence, resolver=resolver)
+    monitor = TrajectoryMonitor()
+    plane = ControlPlane(
+        compiler.compile_ecc, evidence, resolver=resolver, checks=(monitor.check,),
+    )
     firewall = ExecutionFirewall(signer, world, evidence)
     governed = GovernedTools(plane, firewall, firewall.public_repo_read)
     return ScenarioRuntime(governed, world)

@@ -3,7 +3,7 @@
 CROA component: control plane — runs C3 first and records every evaluated stage.
 Gemini action it addresses: #1–3, centralizing execution authorization.
 Fails closed: the first DENY prevents all later checks and contract compilation.
-C2 evaluates C1 policy after C3; C4 remains unevaluated until CD-005.
+C2 evaluates C1 policy after C3; injected checks place C4 before C7.
 """
 
 from collections.abc import Callable

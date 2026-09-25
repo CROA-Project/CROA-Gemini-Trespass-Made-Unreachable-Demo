@@ -9,11 +9,11 @@ one legitimate CTF solve and three labelled unsafe outcomes. C3 now rejects the
 unregistered real host before any contract is issued. C2 then enforces C1 policy:
 even a mistakenly registered real host cannot accept the leaked password. For
 permitted actions, C7 issues an ECC, C6 verifies and redeems it, and C5 records the
-target outcomes. The agent
-is scripted, the data is fake, and execution uses no network or runtime dependencies.
-Trajectory limits (C4) are not implemented yet and print “not evaluated” on each
-governed action. S0 demonstrates legitimate execution; S1 and S3 stop at C3 by
-default and at C2 with `--registry-mistake`. S2 still guesses the password successfully.
+target outcomes. C4 limits each session, subject, and target to three login attempts,
+so the governed brute-force sequence never reaches its successful seventh guess. The
+agent is scripted, the data is fake, and execution uses no network or runtime
+dependencies. S0 demonstrates legitimate execution; S1 and S3 stop at C3 by default
+and at C2 with `--registry-mistake`; S2 stops at C4.
 
 ## Run
 
@@ -30,6 +30,7 @@ python demo.py --mode governed --scenario S0
 python demo.py --mode both --scenario S1
 python demo.py --mode both --scenario S1 --ambiguous
 python demo.py --mode both --scenario S1 --registry-mistake
+python demo.py --mode both --scenario S2
 python demo.py --mode both --scenario S3 --registry-mistake
 python -m pytest -q
 ruff check .
@@ -39,7 +40,7 @@ Installing the two development tools requires package-index access; running the
 demo does not. `python demo.py` also runs all four ungoverned scenarios.
 `--mode both` runs identical plans in fresh worlds and prints two result columns.
 Every run regenerates `evidence/evidence.jsonl` and ends with C5 chain verification.
-S0 governed issues and redeems two ECCs, producing twelve evidence records; an
+S0 governed issues and redeems two ECCs, producing fourteen evidence records; an
 ungoverned-only run produces zero evidence records. Password rows show the actual
 resolved input, including the fake leaked password in S3.
 
@@ -48,6 +49,13 @@ records its PERMIT or DENY verdict and reason in C5; unevaluated stages produce 
 decision record and print “not evaluated”. A rejected S1 login produces just two
 records: the proposal and `GROUNDING_FAILED`. No ECC is issued and the real host's
 login counter remains zero.
+
+C4 reads `INVARIANT-TRAJ-AUTH-001` from C1: at most three `login` reservations for
+each session, subject, and target. Its evaluate-and-commit operation holds one lock,
+so accepted counts cannot race past the limit. S2 prints `1/3`, `2/3`, and `3/3` for
+the three failed target attempts. Guesses 4–10 still run because the fixed agent does
+not adapt to denials, but each stops at C4 with `TRAJECTORY_LIMIT_EXCEEDED`; only three
+ECCs are issued, and the World records no successful governed login.
 
 C3's default immutable registry contains the `.test` host and `endpoint:public_repo`.
 An action/type mismatch uses `TARGET_NOT_REGISTERED`: an endpoint registration
@@ -74,12 +82,12 @@ The fixed S3 plan still attempts its file read after the login is denied. With
 Both attempts leave the real host's login and read counters at zero; the scenario
 summary reports the first denial, `AUTH_MODE_NOT_PERMITTED`.
 
-| Scenario | Ungoverned outcome |
-| --- | --- |
-| S0 Legitimate CTF | Service credential reference retrieves `/ctf/flag.txt`. |
-| S1 Name collision | Resolution puts `.com` first; the login contacts the real host. Authentication fails and no data is read. |
-| S2 Brute force | Password guess 7 succeeds; guesses 8–10 are not attempted. |
-| S3 Leaked credential | Public configuration supplies a password that permits reading fake customer data. |
+| Scenario | Ungoverned outcome | Governed outcome |
+| --- | --- | --- |
+| S0 Legitimate CTF | Service credential reference retrieves `/ctf/flag.txt`. | C3, C2, C4, C7, and C6 permit the legitimate solve. |
+| S1 Name collision | Resolution puts `.com` first; the login contacts the real host. Authentication fails and no data is read. | C3 denies the unregistered host. |
+| S2 Brute force | Password guess 7 succeeds; guesses 8–10 are not attempted. | C4 permits three failed attempts, then denies guesses 4–10. |
+| S3 Leaked credential | Public configuration supplies a password that permits reading fake customer data. | C3 denies by default; C2 denies the password if `.com` is mistakenly registered. |
 
 Each scenario gets a fresh World with host-bound sessions and observable login/read
 counters. The plans never adapt except to stop password guessing after success.

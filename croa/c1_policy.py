@@ -1,9 +1,9 @@
 """C1 Policy Authority.
 
-CROA component: C1 — owns policy content and credentials used by C2 and C6.
-Gemini action it addresses: #3, distinguishing an issued secret from a public leak.
+CROA component: C1 — owns policy, invariant, and credential authority data.
+Gemini action it addresses: #2 and #3, limiting guesses and validating provenance.
 Fails closed: unmatched actions have no permission, and an issued credential
-can authenticate only at its bound target. Trajectory limits arrive in CD-005.
+can authenticate only at its bound target; C4 reads trajectory limits from here.
 """
 
 from collections.abc import Mapping
@@ -24,6 +24,15 @@ class Policy:
     path_prefix: str | None = None
 
 
+@dataclass(frozen=True)
+class Invariant:
+    """A trajectory limit owned by C1 and enforced by C4."""
+
+    action: str
+    scope: str
+    limit: int
+
+
 ISSUED_CREDENTIALS: Mapping[str, IssuedCredential] = MappingProxyType({
     CREDENTIAL_ID: IssuedCredential(
         CREDENTIAL_ID, CTF_TARGET, "local-ctf-service-secret"
@@ -36,7 +45,11 @@ POLICIES: tuple[Policy, ...] = (
            auth_modes=("credential_id",)),
     Policy("read_file", CTF_TARGET, ("path", "session_token"), path_prefix="/ctf/"),
 )
-INVARIANTS: Mapping[str, object] = MappingProxyType({})
+INVARIANTS: Mapping[str, Invariant] = MappingProxyType({
+    "INVARIANT-TRAJ-AUTH-001": Invariant(
+        action="login", scope="session:subject:target", limit=3,
+    ),
+})
 
 
 def lookup_credential(credential_id: str, target: str) -> IssuedCredential | None:

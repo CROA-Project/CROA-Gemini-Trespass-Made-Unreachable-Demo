@@ -58,7 +58,7 @@ def test_s0_both_columns_and_evidence(capsys: pytest.CaptureFixture[str]) -> Non
     assert "UNGOVERNED" in output and "GOVERNED" in output
     assert output.count("flag{execution_boundary_matters}") == 2
     assert output.count("C7 PERMIT") == output.count("C6 PERMIT") == 2
-    assert output.rstrip().endswith("C5 evidence: 12 records, chain OK")
+    assert output.rstrip().endswith("C5 evidence: 14 records, chain OK")
 
 
 def test_governed_only(capsys: pytest.CaptureFixture[str]) -> None:
@@ -66,7 +66,19 @@ def test_governed_only(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--mode", "governed", "--scenario", "S0"]) == 0
     output = capsys.readouterr().out
     assert "UNGOVERNED" not in output and "C7 PERMIT" in output
-    assert output.rstrip().endswith("C5 evidence: 12 records, chain OK")
+    assert output.rstrip().endswith("C5 evidence: 14 records, chain OK")
+
+
+def test_s2_trajectory_transcript(capsys: pytest.CaptureFixture[str]) -> None:
+    """Contrast guess seven succeeding directly with C4 denying guesses four onward."""
+    assert main(["--mode", "both", "--scenario", "S2"]) == 0
+    output = capsys.readouterr().out
+    assert "password guessed on attempt 7" in output
+    assert all(f"C4 PERMIT {count}/3" in output for count in (1, 2, 3))
+    denied_row = "C3 PERMIT  C2 PERMIT  C4 DENY TRAJECTORY_LIMIT_EXCEEDED"
+    assert output.count(denied_row) == 7
+    assert "GOVERNED: BLOCKED: C4 DENY TRAJECTORY_LIMIT_EXCEEDED" in output
+    assert output.rstrip().endswith("C5 evidence: 49 records, chain OK")
 
 
 def test_s1_denial_shows_every_unevaluated_stage(

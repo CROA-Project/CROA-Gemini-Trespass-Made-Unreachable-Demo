@@ -1,7 +1,7 @@
 """Fixed plans for the Gemini replay.
 
-Demo role: execute S0–S3 without adapting to success or failure, except that
-the brute-force sequence stops on a successful login.
+Demo role: execute S0–S3 without adapting to denials; the brute-force sequence
+stops only on a successful login and therefore continues after every C4 denial.
 Gemini action it addresses: #1–3, the name collision, guesses, and leaked password.
 Must never import: world, CROA signing, or firewall implementations.
 """
@@ -110,7 +110,7 @@ def _execute_step(step: Step, tools: Tools, state: _PlanState) -> StepResult:
 
 
 def run_plan(plan: Sequence[Step], tools: Tools) -> list[StepResult]:
-    """Run the fixed sequence, stopping only when a brute-force login succeeds.
+    """Run every fixed step except guesses after a successful brute-force login.
 
     Args:
         plan: Ordered scripted steps; never modified during execution.

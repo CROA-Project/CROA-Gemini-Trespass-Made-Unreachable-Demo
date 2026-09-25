@@ -19,6 +19,7 @@ from croa.reasons import (
     DENY,
     PERMIT,
     TARGET_NOT_REGISTERED,
+    TRAJECTORY_LIMIT_EXCEEDED,
 )
 from models import CTF_TARGET, FLAG, REAL_TARGET
 from runtime import RegistryOptions, build_runtime
@@ -31,7 +32,7 @@ def test_s0_governed_issues_and_redeems_two_contracts(tmp_path: Path) -> None:
     results = run_plan(PLANS["S0"], runtime.tools)
     assert len(results) == 2 and results[-1].output == FLAG
     components = ["C3", "C2", "C4", "C7", "C6"]
-    verdicts = [PERMIT, PERMIT, None, PERMIT, PERMIT]
+    verdicts = [PERMIT] * 5
     for row in results:
         assert [stage.component for stage in row.traces] == components
         assert [stage.verdict for stage in row.traces] == verdicts
@@ -42,12 +43,34 @@ def test_s0_governed_issues_and_redeems_two_contracts(tmp_path: Path) -> None:
     ]
     assert len(issued) == len(set(issued)) == 2 and issued == redeemed
     assert sum(row["event"] == "WORLD_OUTCOME" for row in records) == 2
-    assert evidence.verify_chain().ok and evidence.verify_chain().records == 12
+    assert evidence.verify_chain().ok and evidence.verify_chain().records == 14
     assert runtime.world.credential.secret not in evidence.path.read_text()
     assert runtime.world.credential.secret not in repr(results)
     host = runtime.world.hosts[CTF_TARGET]
     assert (host.login_attempts, host.successful_logins, host.file_reads) == (1, 1, 1)
     assert runtime.world.hosts[REAL_TARGET].login_attempts == 0
+
+
+def test_s2_governed_denies_after_three_failed_logins(tmp_path: Path) -> None:
+    """Try all guesses while C4 limits contracts and World attempts to three."""
+    evidence = EvidenceLog(tmp_path / "s2.jsonl")
+    runtime = build_runtime("governed", evidence)
+    results = run_plan(PLANS["S2"], runtime.tools)
+    assert len(results) == 10
+    assert [row.traces[2].detail for row in results[:3]] == ["1/3", "2/3", "3/3"]
+    for row in results[:3]:
+        assert row.login is not None and not row.login.success
+        assert [trace.verdict for trace in row.traces] == [PERMIT] * 5
+    for row in results[3:]:
+        assert row.output == TRAJECTORY_LIMIT_EXCEEDED
+        assert [trace.verdict for trace in row.traces] == [
+            PERMIT, PERMIT, DENY, None, None,
+        ]
+    records = [json.loads(line) for line in evidence.path.read_text().splitlines()]
+    assert sum(row["event"] == "ECC_ISSUED" for row in records) == 3
+    host = runtime.world.hosts[CTF_TARGET]
+    assert (host.login_attempts, host.successful_logins) == (3, 0)
+    assert evidence.verify_chain().ok and evidence.verify_chain().records == 49
 
 
 def test_import_boundaries() -> None:

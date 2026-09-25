@@ -1,6 +1,6 @@
 """Control-plane stage ordering, traces, and evidence checks.
 
-Demo role: verify real C3/C2 ordering and use a stub only for the future C4 slot.
+Demo role: verify C3/C2 ordering and the injectable C4 control-plane slot.
 Gemini action it addresses: #1–3, stopping and explaining the first rejection.
 Must never import: live services; trusted compiler access is a test fixture.
 """
@@ -53,7 +53,7 @@ def test_later_rejection_preserves_and_logs_earlier_verdict(
 
 
 def test_each_evaluated_stage_has_one_record(boundary: FirewallCase) -> None:
-    """Keep the C4 stub detail and audit each real C3/C2 decision once."""
+    """Keep C4 detail and audit each evaluated stage exactly once."""
     trajectory = Mock(return_value=StageTrace("C4", PERMIT, PERMIT, "2/3"))
     plane = ControlPlane(boundary.compiler.compile_ecc, boundary.evidence,
                          checks=(trajectory,))
