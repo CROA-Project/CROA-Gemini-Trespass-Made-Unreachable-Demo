@@ -43,7 +43,7 @@ def _run_s4(evidence: EvidenceLog, options: RegistryOptions) -> list[StepResult]
 def _s4_not_applicable() -> list[StepResult]:
     """Represent the absence of C6 in ungoverned mode without executing a bypass."""
     return [
-        StepResult(step, step.target, "NOT APPLICABLE: no C6")
+        StepResult(step, step.target, step.ungoverned_output)
         for step in PLANS["S4"]
     ]
 
