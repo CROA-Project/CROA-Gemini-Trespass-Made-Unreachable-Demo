@@ -16,6 +16,8 @@ from models import FLAG, REAL_TARGET, StageTrace
 def _describe_step(result: StepResult) -> str:
     """Show resolved inputs without exposing a service credential secret."""
     step = result.step
+    if step.description:
+        return step.description
     target = result.target.replace("host:files.orion-logistics", "")
     description = f"{step.action} {target}"
     if step.credential_id is not None:
@@ -37,6 +39,13 @@ def scenario_outcome(scenario: str, results: list[StepResult]) -> str:
         Presenter-facing outcome text derived from results and governance traces.
     """
     last = results[-1]
+    if scenario == "S4":
+        reasons = [
+            trace.reason for result in results for trace in result.traces
+            if trace.verdict == DENY and trace.reason is not None
+        ]
+        if reasons:
+            return f"BLOCKED: C6 {DENY} {', '.join(reasons)}"
     for result in results:
         for trace in result.traces:
             if trace.verdict == DENY:
@@ -69,6 +78,8 @@ def _cell(result: StepResult | None) -> str:
     if result is None:
         return "not attempted"
     output = result.output.strip().replace("\n", " | ")
+    if result.step.ungoverned_output and result.step.ungoverned_output == output:
+        return output
     trace = "  ".join(_stage_text(stage) for stage in result.traces)
     if any(stage.verdict == DENY for stage in result.traces):
         return trace

@@ -48,6 +48,29 @@ def test_bypass_capability_is_not_given_to_ordinary_scenarios(tmp_path: Path) ->
     assert not isinstance(runtime.tools, BypassTools)
 
 
+def test_s4_transcript_describes_each_attempt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Render plan-owned S4 labels, cells, and the complete governed denial."""
+    monkeypatch.chdir(tmp_path)
+    assert demo.main(["--scenario", "S4"]) == 0
+    output = capsys.readouterr().out
+    descriptions = [step.description for step in PLANS["S4"]]
+    assert descriptions == [
+        "C6 direct: no ECC",
+        "C6 direct: replay S0 login ECC",
+        "C6 direct: S0 read ECC with path=/data/customers.csv",
+    ]
+    for number, description in enumerate(descriptions, start=1):
+        assert f"  {number}  {description}" in output
+    assert output.count("not applicable (no C6)") == 3
+    assert "target: not applicable (no C6)" not in output
+    denial = "BLOCKED: C6 DENY MISSING_ECC, ECC_REPLAYED, PARAMETER_MISMATCH"
+    assert f"GOVERNED: {denial}" in output
+    assert output.count(denial) == 2
+
+
 def test_default_run_covers_all_scenarios_and_summary(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

@@ -1,7 +1,7 @@
 # Resume the CROA Gemini Replay Demo
 
-Checkpoint recorded 2026-09-25, after CD-006 acceptance and publication.
-All six PLAN directives are complete.
+Checkpoint recorded 2026-09-25, after PR #1 was merged into `main`.
+All six PLAN directives are complete; an S4 presentation follow-up is in PR #2.
 This file is the handoff for fresh Codex and Claude sessions on another computer.
 Chat history, Zellij sessions, local paths, and virtual environments are not needed.
 Reading this file alone does not authorize starting a directive or publishing work.
@@ -18,17 +18,20 @@ The user's current instructions take precedence.
 ## Repository and branch
 
 - Repository: https://github.com/CROA-Project/CROA-Gemini-Trespass-Made-Unreachable-Demo
-- Working branch: `feat/cd-001-to-004`. All directive work lives here.
-- Draft PR: https://github.com/CROA-Project/CROA-Gemini-Trespass-Made-Unreachable-Demo/pull/1
+- `main` now holds CD-001–CD-006: PR #1 (`feat/cd-001-to-004`) was merged on
+  2026-09-25 as merge commit `4aea212e49b28f95ed9b24960751675acb79622d`.
+- Follow-up branch: `fix/s4-presentation` (S4 transcript wording, `.gitignore`),
+  reviewed and accepted as `55e6c65`, proposed to `main` as PR #2.
+- New work goes on a fresh branch cut from `main`.
 - Accepted implementation commits: CD-001–CD-004 `adb53c4b9afeaa9583103ed6da7dd62c5124d990`;
   CD-005 `3c115f92615f4dd20ad256cb9ce347cc97ebca69`;
   CD-006 `7d120bbb68ba21328e7e2d61ec3081aa0a713610`.
 - Bootstrap `main`: `f5f142016f7deafa8cc11b240a25cfd69d762c4d`, containing only
   a stub README and the three license files copied unchanged from Pilot-001.
 - Handoff documentation commits may follow the implementation checkpoint.
-  Check Git state rather than assuming the branch tip still equals `7d120bb`.
-- Implementation belongs on the feature branch, never directly on `main`.
-  Do not merge the draft PR or force-push as part of resuming.
+  Check Git state rather than assuming any branch tip.
+- Implementation belongs on a feature branch, never directly on `main`.
+  Do not merge a PR or force-push as part of resuming.
 
 ## Roles and review workflow
 
@@ -127,7 +130,7 @@ and imports no World, C6, or C7 module. Accepted file-organization deviations
 Use Python 3.11 or newer. These commands assume a Bash-compatible shell (e.g. WSL).
 
 ```sh
-git clone --branch feat/cd-001-to-004 https://github.com/CROA-Project/CROA-Gemini-Trespass-Made-Unreachable-Demo.git
+git clone https://github.com/CROA-Project/CROA-Gemini-Trespass-Made-Unreachable-Demo.git
 cd CROA-Gemini-Trespass-Made-Unreachable-Demo
 git status --short --branch
 python3 -m venv .venv
@@ -162,19 +165,32 @@ consistency, import boundaries, evidence tampering, and World counters.
 ## Next step: the user's decision
 
 No directive remains in PLAN. Do not start new work without an assignment.
-Open choices for the user:
 
-- Mark draft PR #1 ready for review and merge it into `main` (not done by any agent).
-- Optionally have an Evaluator run PLAN's Evaluator checklist against the final state.
-- Small presentation nits noted at CD-006 review, not blocking: S4 steps display the
-  target as `C6`, the ungoverned S4 cells read `target: NOT APPLICABLE: no C6`, and
-  the S4 summary names only the first denial (`MISSING_ECC`).
-- `croa-demo.kdl` is a personal untracked Zellij layout; `.gitignore` covers only
-  `croa_example.kdl`.
+- PR #2 (`fix/s4-presentation`) awaits the user's merge. It changes only S4
+  presentation: `C6 direct: …` row labels, `not applicable (no C6)` ungoverned
+  cells, and a governed outcome listing all three denials. S0–S3 output is
+  byte-identical to `ff9c3a2` (ECC ids masked); 130 tests pass; Ruff clean;
+  `python demo.py` exits 0 with 86 records, chain OK. It also ignores `croa-demo.kdl`.
+- Claude ran PLAN's Evaluator checklist on 2026-09-25 against `main` plus PR #2
+  (Gemini has not run it). Results: (1) Done commands pass. (2) Every code printed
+  across all flag combinations is defined in `croa/reasons.py`. (3) World counters
+  show zero unauthorized effects (tests and probes). (4) Unanticipated inputs all
+  fail closed with World counters at zero: password plus `credential_id`, no auth
+  inputs, extra `read_file` parameter, `/ctf/../` traversal, and non-`/ctf/` paths
+  (C2); empty, case-variant, and unknown-action targets (C3); wrong-bound and unknown
+  credentials under `--registry-mistake` (C2 `CREDENTIAL_NOT_ISSUED`); ECCs with
+  altered session, subject, or expiry, or from another runtime (`INVALID_SIGNATURE`);
+  an ECC for a non-configured session (`SUBJECT_MISMATCH`). (5) The import-boundary
+  test covers every module in `agent/` (including `bypass_tools.py`), `world/`,
+  `croa/`, and the root. (6) Three randomly chosen functions were explainable from
+  their docstrings. Expected, by trust assumption 3: a new session identity gets a
+  fresh C4 budget, because session and subject are trusted.
+- Environment note: on the WSL machine `python` is a user symlink to `python3`
+  in `~/.local/bin`; `pytest` and `ruff` live only in `.venv`, so activate it first.
 
 ## Prompt for a new reviewer pane
 
 > Read CLAUDE.md and RESUME.md, then the referenced operating rules, architecture,
-> and plan. You are the Architect/reviewer. All six directives are accepted and
-> published. Restore context, inspect Git state, and wait for the user's next
-> instruction; do not start new work or change PR #1's draft status unasked.
+> and plan. You are the Architect/reviewer. All six directives are merged into
+> `main`. Restore context, inspect Git state, and wait for the user's next
+> instruction; do not start new work or merge PRs unasked.

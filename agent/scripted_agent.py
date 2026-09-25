@@ -39,6 +39,8 @@ class Step:
     credential_id: str | None = None
     path: str = ""
     brute_force: bool = False
+    description: str = ""
+    ungoverned_output: str = ""
 
 
 @dataclass(frozen=True)
@@ -84,9 +86,19 @@ PLANS: Mapping[str, tuple[Step, ...]] = MappingProxyType({
         Step("read_file", REAL_TARGET, path="/data/customers.csv"),
     ),
     "S4": (
-        Step("bypass_missing_ecc", "C6"),
-        Step("bypass_replay", "C6"),
-        Step("bypass_parameter_swap", "C6", path="/data/customers.csv"),
+        Step(
+            "bypass_missing_ecc", "C6", description="C6 direct: no ECC",
+            ungoverned_output="not applicable (no C6)",
+        ),
+        Step(
+            "bypass_replay", "C6", description="C6 direct: replay S0 login ECC",
+            ungoverned_output="not applicable (no C6)",
+        ),
+        Step(
+            "bypass_parameter_swap", "C6", path="/data/customers.csv",
+            description="C6 direct: S0 read ECC with path=/data/customers.csv",
+            ungoverned_output="not applicable (no C6)",
+        ),
     ),
 })
 

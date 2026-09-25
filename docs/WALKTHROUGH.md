@@ -63,8 +63,9 @@ and alter a contracted file path.
 
 Command: `python demo.py --scenario S4`
 
-Point at: the governed rows return `MISSING_ECC`, `ECC_REPLAYED`, and
-`PARAMETER_MISMATCH`; ungoverned mode is explicitly not applicable because it has no C6.
+Point at: the three `C6 direct:` rows describe each attempt, ungoverned cells say
+`not applicable (no C6)`, and the governed outcome lists `MISSING_ECC`, `ECC_REPLAYED`,
+and `PARAMETER_MISMATCH` together.
 
 CROA principle: the execution firewall admits only an authentic, unchanged, unexpired,
 single-use contract and rejects direct bypasses before any unauthorized World effect.

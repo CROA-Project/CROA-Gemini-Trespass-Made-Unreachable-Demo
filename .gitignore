@@ -5,3 +5,4 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 croa_example.kdl
+croa-demo.kdl
