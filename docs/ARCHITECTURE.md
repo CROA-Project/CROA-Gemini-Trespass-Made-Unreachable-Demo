@@ -183,7 +183,11 @@ S2  Brute force                         UNGOVERNED                          GOVE
 
 After all scenarios: a summary table (scenario, ungoverned result, governed result,
 deciding component) and the C5 chain verification line
-(`C5 evidence: 41 records, chain OK`).
+(`C5 evidence: 86 records, chain OK` for the full default run).
+
+The sample above is the original design sketch. The implemented transcript prints
+explicit `PERMIT` / `DENY` verdicts and `not evaluated` for skipped stages; run
+`python demo.py --scenario S2` for the exact format.
 
 ---
 
