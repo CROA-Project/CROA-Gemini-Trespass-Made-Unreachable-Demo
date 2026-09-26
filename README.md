@@ -10,7 +10,8 @@ work still succeeds; S1–S3 isolate target grounding, trajectory, and credentia
 provenance controls; S4 attacks the execution firewall directly. The final summary
 names the component that decided each governed scenario.
 
-New to CROA? Start with [the plain-English explainer](docs/EXPLAINER.md).
+New to CROA? Start with [the plain-English explainer](docs/EXPLAINER.md), or see
+[the one-page diagram and developer checklist](docs/CROA_DIAGRAM.md).
 
 Continuing development in a fresh session? Read [RESUME.md](RESUME.md). For the full
 design and trust assumptions, see [the architecture](docs/ARCHITECTURE.md).

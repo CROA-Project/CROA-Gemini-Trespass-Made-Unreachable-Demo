@@ -5,7 +5,8 @@ incident. Part 2 explains, in plain English, how CROA stops each of those things
 Part 3 is the technical detail: how CROA is wired up in this repository, piece by
 piece, with pointers into the code.
 
-If you only have five minutes, read Parts 1 and 2.
+If you only have five minutes, read Parts 1 and 2. For a one-page picture and
+developer checklist, see [CROA_DIAGRAM.md](CROA_DIAGRAM.md).
 
 ---
 
