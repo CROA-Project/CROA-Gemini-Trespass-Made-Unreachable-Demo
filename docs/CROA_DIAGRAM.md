@@ -16,9 +16,9 @@ flowchart LR
 
     subgraph Plane ["Control plane: should this action happen?"]
         direction LR
-        c3["② C3 Path Resolver<br/>Approved target?<br/>stops Gemini #1"]:::croa
-        c2["③ C2 Governor + C1 Policy<br/>Allowed here, this way?<br/>stops Gemini #3"]:::croa
-        c4["④ C4 Invariant Monitor<br/>Too many attempts? max 3<br/>stops Gemini #2"]:::croa
+        c3["② C3 Path Resolver<br/>Approved target?<br/>stops #1: wrong host"]:::croa
+        c2["③ C2 Governor + C1 Policy<br/>Allowed here, this way?<br/>stops #3: found password,<br/>even if the registry is wrong"]:::croa
+        c4["④ C4 Invariant Monitor<br/>Too many attempts? max 3<br/>stops #2: password guessing"]:::croa
         c7["⑤ C7 Contract Compiler<br/>Signs a one-time slip"]:::croa
     end
 
@@ -37,6 +37,8 @@ flowchart LR
     style Sandbox fill:none,stroke:#1d4ed8,stroke-width:2px,stroke-dasharray: 6 4
     style Plane fill:none,stroke:#6d28d9,stroke-width:1px,stroke-dasharray: 4 4
 ```
+
+**The three Gemini actions** (Google disclosure, 18 September 2026): **#1** resolved a fictional company name to a real company's host; **#2** brute-forced a login by guessing passwords; **#3** reused a password found in a public code repository. In this demo #3 is stopped by C3 under the default registry; run with `--registry-mistake` to see C2 stop it after C3 has been fooled.
 
 ## Developer steps
 
